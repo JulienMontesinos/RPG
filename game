@@ -37,22 +37,6 @@ class Game:
        #dessiner le groupe de calques
        self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=4)
        self.group.add(self.player)
-
-    def handle_input(self):
-       press = pygame.key.get_pressed()
-
-       if press[pygame.K_UP]:
-          self.player.move_up()
-          self.player.change_animation('up')
-       elif press[pygame.K_DOWN]:
-          self.player.move_down()
-          self.player.change_animation('down')
-       elif press[pygame.K_LEFT]:
-          self.player.move_left()
-          self.player.change_animation('left')
-       elif press[pygame.K_RIGHT]:
-          self.player.move_right()
-          self.player.change_animation('right')
           
     def update(self):
        self.group.update()

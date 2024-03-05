@@ -9,29 +9,25 @@ from network import Network
 width = 480
 height = 480
 pygame.init()
-screen = pygame.display.set_mode((width,height))
-#chargement de la carte
-tmx_data = pytmx.util_pygame.load_pygame('carte.tmx')
-map_data = pyscroll.data.TiledMapData(tmx_data)
-map_layer = pyscroll.orthographic.BufferedRenderer(map_data,[width,height])
+
 
 class Game:
 
     def __init__(self):
        #Creation de la fenetre du jeu
-       #self.screen = pygame.display.set_mode((width,height))
+       self.screen = pygame.display.set_mode((width,height))
        pygame.display.set_caption("Jeu en 2D")
-       self.players = []  # 玩家列表
        
        #chargement de la carte
-       #tmx_data = pytmx.util_pygame.load_pygame('carte.tmx')
-       #map_data = pyscroll.data.TiledMapData(tmx_data)
-       #map_layer = pyscroll.orthographic.BufferedRenderer(map_data,self.screen.get_size())
+       tmx_data = pytmx.util_pygame.load_pygame('carte.tmx')
+       map_data = pyscroll.data.TiledMapData(tmx_data)
+       map_layer = pyscroll.orthographic.BufferedRenderer(map_data,self.screen.get_size())
 
        #generer un joueur
        #player_position = tmx_data.get_object_by_name("player")
        #self.player = Player(player_position.x,player_position.y)
        #self.player = Player(20, 30)
+
 
        #définir une liste d'obsctale
        self.obstacles = []
@@ -39,8 +35,8 @@ class Game:
           if obj.type == "collision":
              self.obstacles.append(pygame.Rect(obj.x,obj.y,obj.width, obj.height))
        #dessiner le groupe de calques
-       #self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=4)
-       #self.group.add(self.player)
+       self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=4)
+       self.group.add(self.player)
 
     def handle_input(self):
        press = pygame.key.get_pressed()
@@ -65,16 +61,8 @@ class Game:
        for sprite in self.group.sprites():
           if sprite.feet.collidelist(self.obstacles) > -1:
               sprite.move_back()
-    
-    def genere_players(player1, player2):
-       player_position = tmx_data.get_object_by_name("female")
-       player = Player(player_position.x,player_position.y)
-       group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=4)
-       group.add(player)
-       group.add(player1)
-       group.add(player2)
 
-     def add_player(self, player_data):
+    def add_player(self, player_data):
         new_player = Player(player_data)
         self.players.append(new_player)
 
@@ -84,14 +72,13 @@ class Game:
         n = Network()
         p = n.getP()
 
-
         while running:
            self.player.save_location()
            self.handle_input()
            self.update()
            self.group.center(self.player.rect.center)
            #self.group.draw(self.screen)
-           self.group.draw(screen)
+           self.group.draw(self.screen)
            p2 = n.send(p)
            self.genere_players(p, p2)
            pygame.display.flip()

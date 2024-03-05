@@ -66,17 +66,20 @@ class Game:
         new_player = Player(player_data)
         self.players.append(new_player)
 
-   def genere_players(self, players_data):
-    for player_id, player_info in players_data.items():
-        # 检查玩家是否已存在
-        if player_id not in self.players:
-            # 如果玩家不存在，创建新的玩家实例
-            new_player = Player(player_info['x'], player_info['y'], player_info['image'])
-            self.players[player_id] = new_player
-        else:
-            # 如果玩家已存在，更新其位置和其他可能的状态
-            self.players[player_id].x = player_info['x']
-            self.players[player_id].y = player_info['y']
+def genere_players(self, players_data):
+    # 清除现有玩家列表，为新的玩家数据做准备
+    self.players.clear()
+
+    for player_info in players_data:
+        # 创建新的玩家实例
+        new_player = Player(player_info['x'], player_info['y'], player_info['image'])
+        # 将新玩家添加到玩家列表中
+        self.players.append(new_player)
+
+    # 确保更新玩家渲染组
+    self.group.empty()  # 清除旧的精灵组
+    for player in self.players:
+        self.group.add(player.sprite)  # 假设每个玩家对象有一个sprite属性
 
     def run(self):
         clock = pygame.time.Clock()

@@ -1,5 +1,8 @@
 import pygame
 
+global image_player
+image_player = pygame.Surface([32,32])
+
 class Player(pygame.sprite.Sprite):
 
     def __init__(self,x,y):
@@ -40,18 +43,18 @@ class Player(pygame.sprite.Sprite):
        press = pygame.key.get_pressed()
 
        if press[pygame.K_UP]:
-          self.player.move_up()
-          self.player.change_animation('up')
+          self.move_up()
+          self.change_animation('up')
        elif press[pygame.K_DOWN]:
-          self.player.move_down()
-          self.player.change_animation('down')
+          self.move_down()
+          self.change_animation('down')
        elif press[pygame.K_LEFT]:
-          self.player.move_left()
-          self.player.change_animation('left')
+          self.move_left()
+          self.change_animation('left')
        elif press[pygame.K_RIGHT]:
-          self.player.move_right()
-          self.player.change_animation('right')
-
+          self.move_right()
+          self.change_animation('right')
+    
     def update(self):
         self.rect.topleft = self.position
         self.feet.midbottom = self.rect.midbottom
@@ -60,8 +63,9 @@ class Player(pygame.sprite.Sprite):
         self.position = self.old_position
         self.rect.topleft = self.position
         self.feet.midbottom = self.rect.midbottom
+    
 
     def get_image(self, x, y):
-        image = pygame.Surface([32,32])
+        image = image_player
         image.blit(self.sprite_sheet, (0,0), (x,y,32,32))
         return image

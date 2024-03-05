@@ -12,7 +12,7 @@ pygame.init()
 
 
 class Game:
-
+    global players, tmx_data, map_data, map_layer
     def __init__(self):
        #Creation de la fenetre du jeu
        self.screen = pygame.display.set_mode((width,height))
@@ -28,6 +28,8 @@ class Game:
        #self.player = Player(player_position.x,player_position.y)
        #self.player = Player(20, 30)
        self.players = []
+       player_position = tmx_data.get_object_by_name("player")
+       self.players.append(Player(player_position.x,player_position.y))
 
        #définir une liste d'obsctale
        self.obstacles = []
@@ -35,9 +37,10 @@ class Game:
           if obj.type == "collision":
              self.obstacles.append(pygame.Rect(obj.x,obj.y,obj.width, obj.height))
        #dessiner le groupe de calques
-       self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=4)
-       self.group.add(self.player)
-          
+       for player in self.players:
+            self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=3)
+            self.group.add(player)
+
     def update(self):
        self.group.update()
        
@@ -46,45 +49,33 @@ class Game:
           if sprite.feet.collidelist(self.obstacles) > -1:
               sprite.move_back()
 
-    def add_player(self, player_data):
-        new_player = Player(player_data)
-        self.players.append(new_player)
-
-def genere_players(self, players_data):
-    # 清除现有玩家列表，为新的玩家数据做准备
-    self.players.clear()
-
-    for player_info in players_data:
-        # 创建新的玩家实例
-        new_player = Player(player_info['x'], player_info['y'], player_info['image'])
-        # 将新玩家添加到玩家列表中
-        self.players.append(new_player)
-
-    # 确保更新玩家渲染组
-    self.group.empty()  # 清除旧的精灵组
-    for player in self.players:
-        self.group.add(player.sprite)  # 假设每个玩家对象有一个sprite属性
-
+    def generation_players(self):
+         for player in self.players:
+            self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=3)
+            self.group.add(player)
+   
     def run(self):
         clock = pygame.time.Clock()
         running = True
         n = Network()
-        p = n.getP()
-
+        Faux_players = []
+        Faux_players = n.getP()
+        if Faux_players:
+           self.players.extend(Faux_players)
+           self.players.generation_players()
+ 
         while running:
-           self.player.save_location()
-           self.handle_input()
-           self.update()
-           self.group.center(self.player.rect.center)
-           #self.group.draw(self.screen)
-           self.group.draw(self.screen)
-           p2 = n.send(p)
-           self.genere_players(p, p2)
+           for player in self.players:
+               player.save_location()
+               player.handle_input()
+               self.update()
+               self.group.center(player.rect.center)
+               self.group.draw(self.screen)
            pygame.display.flip()
 
            for event in pygame.event.get():
                if event.type == pygame.QUIT:
+                 self.players.clear()
                  running = False
-            
            clock.tick(60)
         pygame.quit()

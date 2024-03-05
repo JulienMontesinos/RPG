@@ -27,7 +27,7 @@ class Game:
        #player_position = tmx_data.get_object_by_name("player")
        #self.player = Player(player_position.x,player_position.y)
        #self.player = Player(20, 30)
-
+       self.players = []
 
        #définir une liste d'obsctale
        self.obstacles = []

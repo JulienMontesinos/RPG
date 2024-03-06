@@ -3,13 +3,12 @@ from _thread import *
 from player import Player
 import pickle
 import random
-#import ast
-#import dill
 
-server = "100.118.202.227"
+
+server = "10.0.94.50"
 port = 5555
-players = []
-
+players = {}
+next_player_id = 0
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
@@ -20,55 +19,57 @@ except socket.error as e:
 s.listen(2)
 print("Waiting for a connection, Server Started")
 
-i = [1,2]
+def generate_player_id():
+    global next_player_id
+    player_id = next_player_id
+    next_player_id += 1
+    return player_id
 
-for item in i:
-    random_x = random.randint(35,310)
-    random_y = random.randint(300,430)
-    new_player = Player(random_x,random_y)
-    players.append(new_player)
-
-def threaded_client(conn, player):
-    conn.send(pickle.dumps(players[player]))
-    #conn.send(dill.dumps(players))
-    #conn.sendall(serialize_server_object(players[player]))
+#def threaded_client(conn, player):
+def threaded_client(conn, player_id):    
+    global players
+    #conn.send(pickle.dumps(players[player]))
+    conn.send(pickle.dumps(player_id))
+    conn.send(pickle.dumps(players))
     reply = ""
-    #random_x = random.randint(35,310)
-    #random_y = random.randint(300,430)
-    #new_player = Player(random_x,random_y)
-    #players.append(new_player)
+
     while True:
         try:
             data = pickle.loads(conn.recv(2048))
-            #data = dill.loads(conn.recv(2048))
-            players = data
-            #serialize_data = conn.recv(2048).decode("utf-8")
-            #data = deserialize_server_object (serialize_data)
-            #players[player] = data
-
+            #players = data
             if not data:
                 print("Disconnected")
-                players.remove(player)
                 break
             else:
-                print("gggggggggggggggggggggggggggg")
+                players[player_id] = data #Mettre à jour les données du joueur actuel
+                reply = {pid: player for pid, player in players.items() if pid != player_id} #Préparer les données à envoyer au client pour tous les joueurs sauf le joueur actuel
+                conn.sendall(pickle.dumps(reply))
  
 
-            conn.sendall(pickle.dumps(reply))
-            #conn.sendall(dill.dumps(reply))
-            #conn.sendall(serialize_server_object(reply))
-        except:
+            #conn.sendall(pickle.dumps(reply))
+
+        except Exception as e:
+            print(e)
             break
 
     print("Lost connection")
+    del players[player_id]
     conn.close()
 
 currentPlayer = 0
 
-while True:
-
+def accept_new_connection():
     conn, addr = s.accept()
     print("Connected to:", addr)
+    player_id = generate_player_id()  #  générer un nouvel identifiant de joueur
+    random_x = random.randint(35,310)
+    random_y = random.randint(300,430)
+    new_player_position = Player(random_x, random_y)  # Générer de nouveaux joueurs
+    players[player_id] = new_player_position # Ajouter un nouveau lecteur au dictionnaire
+    #start_new_thread (threaded_client, (conn, players))
+    start_new_thread(threaded_client, (conn, player_id))
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
-    currentPlayer += 1
+
+while True:
+    
+    accept_new_connection()

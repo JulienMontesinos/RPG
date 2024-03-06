@@ -5,10 +5,11 @@ import pickle
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "100.118.202.227"
+        self.server = ""
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.players = self.connect()
+        #self.players = self.connect()
+        self.player_id, self.players = self.connect()
 
     def getP(self):
         return self.players
@@ -16,9 +17,12 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            return pickle.loads(self.client.recv(2048))
-        except:
-            pass
+            player_id = pickle.loads(self.client.recv(2048))  # Recevoir d’abord l’ID du joueur
+            players = pickle.loads(self.client.recv(2048))  # Recevoir ensuite la liste des joueurs
+            #return pickle.loads(self.client.recv(2048))
+            return player_id, players
+        except Exception as e:
+            print(e)
 
     def send(self, data):
         try:

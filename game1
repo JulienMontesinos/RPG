@@ -1,0 +1,74 @@
+import pygame
+import pytmx
+import pyscroll
+from player import Player
+from network import Network
+
+# 创建游戏窗口
+width = 480
+height = 480
+pygame.init()
+
+class Game:
+    def __init__(self):
+        self.screen = pygame.display.set_mode((width, height))
+        pygame.display.set_caption("Jeu en 2D")
+        
+        # 加载地图
+        tmx_data = pytmx.util_pygame.load_pygame('carte.tmx')
+        map_data = pyscroll.data.TiledMapData(tmx_data)
+        map_layer = pyscroll.orthographic.BufferedRenderer(map_data, self.screen.get_size())
+
+        # 创建地图和玩家组
+        self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=3)
+
+        # 加载玩家
+        self.network = Network()
+        self.player_id = self.network.player_id
+        self.players = self.network.players
+
+        # 生成玩家并添加到地图组
+        for _, player in self.players.items():
+            self.group.add(player)
+
+        # 定义碰撞
+        self.obstacles = [pygame.Rect(obj.x, obj.y, obj.width, obj.height) for obj in tmx_data.objects if obj.type == "collision"]
+
+    def run(self):
+        clock = pygame.time.Clock()
+        running = True
+
+        while running:
+            self.players = self.network.send(self.players[self.player_id])  # 发送当前玩家状态并接收最新状态
+
+            # 更新所有玩家位置
+            for player_id, player_info in self.players.items():
+                if player_id != self.player_id:  # 跳过本地玩家
+                    self.players[player_id].update_with_info(player_info)
+
+            # 处理事件
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+            # 更新本地玩家并检查碰撞
+            self.players[self.player_id].handle_input()
+            self.players[self.player_id].update()
+            self.check_collisions(self.players[self.player_id])
+
+            # 渲染
+            self.group.center(self.players[self.player_id].rect.center)
+            self.group.draw(self.screen)
+            pygame.display.flip()
+
+            clock.tick(60)
+
+        pygame.quit()
+
+    def check_collisions(self, player):
+        if player.feet.collidelist(self.obstacles) > -1:
+            player.move_back()
+
+# 运行游戏
+if __name__ == "__main__":
+    Game().run()

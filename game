@@ -27,9 +27,10 @@ class Game:
        #player_position = tmx_data.get_object_by_name("player")
        #self.player = Player(player_position.x,player_position.y)
        #self.player = Player(20, 30)
-       self.players = []
+       self.players = {}
        player_position = tmx_data.get_object_by_name("player")
-       self.players.append(Player(player_position.x,player_position.y))
+       player_id = self.generate_player_id()
+       self.players[player_id] = Player(player_position.x, player_position.y)
 
        #définir une liste d'obsctale
        self.obstacles = []
@@ -40,6 +41,10 @@ class Game:
        for player in self.players:
             self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=3)
             self.group.add(player)
+   
+    def generate_player_id(self):
+        # utiliser le nombre actuel de joueurs comme identifiant
+        return len(self.players) + 1   
 
     def update(self):
        self.group.update()
@@ -50,7 +55,7 @@ class Game:
               sprite.move_back()
 
     def generation_players(self):
-         for player in self.players:
+         for player_id, player in self.players.items():
             self.group = pyscroll.PyscrollGroup(map_layer=map_layer, default_layer=3)
             self.group.add(player)
    
@@ -58,14 +63,16 @@ class Game:
         clock = pygame.time.Clock()
         running = True
         n = Network()
-        Faux_players = []
+        player_id = n.player_id
+        players = n.players
+        Faux_players = {}
         Faux_players = n.getP()
         if Faux_players:
-           self.players.extend(Faux_players)
-           self.players.generation_players()
+           self.players.update(Faux_players)
+           self.generation_players()
  
         while running:
-           for player in self.players:
+           for player_id, player in self.players.items():
                player.save_location()
                player.handle_input()
                self.update()

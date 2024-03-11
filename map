@@ -1,0 +1,44 @@
+import pygame
+import pytmx
+import pyscroll
+from screen import Screen
+from player import Player
+#from game import Game
+
+class Map:
+    def __init__(self, screen: Screen, game ):
+        self.screen = screen
+        self.tmx_data = None
+        self.map_layer = None
+        self.group = None
+        self.switch_map("map0")
+        self.game = game
+    
+    def switch_map(self, map:str):
+        #chargement de la carte
+        self.tmx_data = pytmx.util_pygame.load_pygame('carte.tmx')
+        self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
+        self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data,self.screen.get_size())
+        
+        #dessiner le groupe de calques
+        self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=3)
+        self.obstacles = []
+        for obj in self.tmx_data.objects:
+             if obj.type == "collision":
+                  self.obstacles.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
+    
+    def add_player(self,player):
+        self.group.add(player)
+
+    def update(self,player):
+        self.group.update()
+        for sprite in self.group.sprites():
+             if sprite.feet.collidelist(self.obstacles) >-1:
+                  sprite.move_back() 
+             
+        player.save_location()         
+        player.action_key()# déplacement de joueur en fonction de touche clavier
+        self.group.draw(self.screen.get_display())
+    
+    def remove_player(self, player): 
+            self.group.remove(player)

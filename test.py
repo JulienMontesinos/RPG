@@ -1,20 +1,34 @@
-def detect_collision(player_rect, panneau_rects):
+def is_position_safe(pos, obstacles):
     """
-    检测玩家与告示牌之间的碰撞。
+    检查给定位置是否与障碍物列表中的任何障碍物重叠。
 
-    :param player_rect: 玩家的矩形对象。
-    :param panneau_rects: 包含所有告示牌矩形对象的列表。
-    :return: 发生碰撞的告示牌索引，如果没有发生碰撞则返回 None。
+    :param pos: 要检查的位置，格式为 (x, y)。
+    :param obstacles: 障碍物列表，每个障碍物都是一个 pygame.Rect 对象。
+    :return: 如果位置安全（不与障碍物重叠），则返回 True；否则返回 False。
     """
-    for index, panneau_rect in enumerate(panneau_rects):
-        if panneau_rect.colliderect(player_rect):
-            return index  # 返回发生碰撞的告示牌的索引
-    return None  # 如果没有发生碰撞，返回 None
+    player_rect = pygame.Rect(pos[0], pos[1], player_width, player_height)  # 假设 player_width 和 player_height 已定义
+    for obstacle in obstacles:
+        if player_rect.colliderect(obstacle):
+            return False
+    return True
 
-# 在 main.py 的某个合适的位置调用这个函数
-# 假设 player.rect 是玩家的矩形对象
-collided_index = detect_collision(player.rect, panneau_rects)
-if collided_index is not None:
-    # 发生了碰撞，现在可以获取和显示消息了
-    message_to_display = panneau[collided_index]["message"]
-    self.display_sign_message(message_to_display)
+
+def find_safe_position(obstacles, map_size):
+    """
+    在地图上找到一个安全的生成位置。
+
+    :param obstacles: 障碍物列表。
+    :param map_size: 地图大小，格式为 (width, height)。
+    :return: 安全的位置坐标，格式为 (x, y)。
+    """
+    while True:
+        # 随机生成一个位置
+        x = random.randint(0, map_size[0] - player_width)
+        y = random.randint(0, map_size[1] - player_height)
+        if is_position_safe((x, y), obstacles):
+            return x, y  # 找到安全位置，返回坐标
+
+# 假设 map_size 是地图的宽度和高度
+# 在玩家接入服务器时调用这个函数来生成玩家
+safe_position = find_safe_position(self.obstacles, map_size)
+player = Player(safe_position[0], safe_position[1])

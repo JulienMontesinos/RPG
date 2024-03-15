@@ -1,16 +1,21 @@
-# RPG_modi
 
-连接到服务器：
+def detect_collision(player_rect, panneau_rects):
+    """
+    检测玩家与告示牌之间的碰撞。
 
-通过指定的主机地址和端口号连接到服务器。
-接收从服务器发送的唯一玩家ID，并将其保存为玩家的ID。
-发送玩家数据：
+    :param player_rect: 玩家的矩形对象。
+    :param panneau_rects: 包含所有告示牌矩形对象的列表。
+    :return: 发生碰撞的告示牌索引，如果没有发生碰撞则返回 None。
+    """
+    for index, panneau_rect in enumerate(panneau_rects):
+        if panneau_rect.colliderect(player_rect):
+            return index  # 返回发生碰撞的告示牌的索引
+    return None  # 如果没有发生碰撞，返回 None
 
-将玩家的当前状态（如位置、方向、帧数等）打包并发送给服务器。
-接收服务器响应，该响应包含其他玩家的状态信息。
-更新其他玩家的数据：
-
-对从服务器接收到的数据进行解码，获取其他玩家的当前状态。
-如果已知的其他玩家不在接收到的数据中，则将其从游戏地图中移除，并从本地存储的玩家列表中删除。
-遍历接收到的玩家数据，如果是当前玩家的数据，则忽略。如果是已知的其他玩家，则更新该玩家的位置、方向等信息。如果是新的玩家，则创建一个新的玩家对象并添加到游戏地图和玩家列表中。
-判断当前玩家是否与其他玩家发生碰撞，如果是，则执行相应的碰撞处理逻辑（如使当前玩家回退）。
+# 在 main.py 的某个合适的位置调用这个函数
+# 假设 player.rect 是玩家的矩形对象
+collided_index = detect_collision(player.rect, panneau_rects)
+if collided_index is not None:
+    # 发生了碰撞，现在可以获取和显示消息了
+    message_to_display = panneau[collided_index]["message"]
+    self.display_sign_message(message_to_display)

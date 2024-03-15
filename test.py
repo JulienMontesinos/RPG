@@ -1,37 +1,20 @@
-def action_mouse(self, event):
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        # 设置目标位置
-        self.target_x, self.target_y = event.pos
+def detect_collision(player_rect, panneau_rects):
+    """
+    检测玩家与告示牌之间的碰撞。
 
-def update(self):
-    # 检查是否需要向目标位置移动
-    if self.x < self.target_x:
-        self.move_right()
-        self.current_dir = "right"
-        self.change_animation("right")
-    elif self.x > self.target_x:
-        self.move_left()
-        self.current_dir = "left"
-        self.change_animation("left")
+    :param player_rect: 玩家的矩形对象。
+    :param panneau_rects: 包含所有告示牌矩形对象的列表。
+    :return: 发生碰撞的告示牌索引，如果没有发生碰撞则返回 None。
+    """
+    for index, panneau_rect in enumerate(panneau_rects):
+        if panneau_rect.colliderect(player_rect):
+            return index  # 返回发生碰撞的告示牌的索引
+    return None  # 如果没有发生碰撞，返回 None
 
-    if self.y < self.target_y:
-        self.move_up()
-        self.current_dir = "up"
-        self.change_animation("up")
-    elif self.y > self.target_y:
-        self.move_down()
-        self.current_dir = "down"
-        self.change_animation("down")
-
-def move_right(self):
-    # 移动角色并限制速度，避免一次跳到目标位置
-    self.x += min(self.speed, self.target_x - self.x)
-
-def move_left(self):
-    self.x -= min(self.speed, self.x - self.target_x)
-
-def move_up(self):
-    self.y -= min(self.speed, self.y - self.target_y)
-
-def move_down(self):
-    self.y += min(self.speed, self.target_y - self.y)
+# 在 main.py 的某个合适的位置调用这个函数
+# 假设 player.rect 是玩家的矩形对象
+collided_index = detect_collision(player.rect, panneau_rects)
+if collided_index is not None:
+    # 发生了碰撞，现在可以获取和显示消息了
+    message_to_display = panneau[collided_index]["message"]
+    self.display_sign_message(message_to_display)
